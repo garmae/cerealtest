@@ -29,7 +29,11 @@ def is_hex_string(string):
 
 
 def open_port(config):
-    ser = serial.Serial(config['port'], config['baudRate'])
+    try:
+        ser = serial.Serial(config['port'], config['baudRate'])
+    except serial.SerialException as err:
+        print('Serial error: ' + str(err))
+        sys.exit(1)
     print('Port opened: ' + ser.name)
     ser.write(b'Test')
     ser.close()
