@@ -1,0 +1,34 @@
+{
+  "serialConfig": {
+    "port": "COM7",
+    "baudRate": 19200,
+    "byteSize": "EIGHTBITS",
+    "parity": "PARITY_NONE",
+    "stopBits": "STOPBITS_ONE",
+    "timeout": 100.0,
+    "xonxoff": false,
+    "rtscts": false,
+    "dsrdtr": false,
+    "writeTimeout": 100.0
+  }
+  "workingDirectory": "\\",
+  "expandCapturingGroups": true,
+  "tests": [
+    {
+      "name": "Basic Test",
+      "isHex": true,
+      "message": "TEST",
+      "expectedRegex": "06",
+      "delay": 10,
+      "script": "test.py"
+    },
+    {
+      "name": "Basic Test",
+      "isHex": true,
+      "message": "TEST",
+      "expectedRegex": "06",
+      "delay": 10,
+      "script": "test.py"
+    }
+  ]
+}
