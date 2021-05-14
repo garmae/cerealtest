@@ -12,15 +12,20 @@ import getopt
 import subprocess
 
 
+class Test(object):
+    def __init__(self, my_dict):
+        for key in my_dict:
+            setattr(self, key, my_dict[key])
+
+    def run(self):
+        pass
+
+
 def is_hex_string(string):
     if re.fullmatch("[0-9A-Fa-f]{2,}", string):
         return True
     else:
         return False
-
-
-def run_test(test):
-    pass
 
 
 def open_port(config):
@@ -53,7 +58,7 @@ def parse_args(argv):
     for opt, arg in opts:
         if opt == '-h':
             print('Usage: cerealtest.py -i <inputfile> -o <outputfile>')
-            sys.exit()
+            sys.exit(0)
         elif opt in ("-i", "--ifile"):
             input_path = arg
         elif opt in ("-o", "--ofile"):
