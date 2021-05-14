@@ -23,7 +23,7 @@
       "script": "test.py"
     },
     {
-      "name": "Basic Test",
+      "name": "Complex Test",
       "isHex": true,
       "message": "TEST",
       "expectedRegex": "06",

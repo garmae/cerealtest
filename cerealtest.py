@@ -11,14 +11,31 @@ import re
 import getopt
 import subprocess
 
+test_collection = []
+
 
 class Test(object):
     def __init__(self, my_dict):
+        self.name = None
+        self.is_hex = None
+        self.message = None
+        self.expected_regex = None
+        self.delay = None
+        self.script = None
         for key in my_dict:
-            setattr(self, key, my_dict[key])
+            setattr(self, re.sub(
+                r'(?<!^)(?=[A-Z])', '_', key).lower(), my_dict[key])
 
     def run(self):
         pass
+
+    def print_attr(self):
+        print(self.name)
+        print(self.is_hex)
+        print(self.message)
+        print(self.expected_regex)
+        print(self.delay)
+        print(self.script)
 
 
 def is_hex_string(string):
@@ -44,6 +61,8 @@ def load_config_file(path):
             print('Invalid JSON file: ' + str(err))
             sys.exit(1)
         open_port(config_data['serialConfig'])
+        for test in config_data['tests']:
+            test_collection.append(Test(test))
 
 
 def parse_args(argv):
@@ -66,7 +85,8 @@ def parse_args(argv):
             output_path = arg
 
     if not input_path:
-        print('No input file specified. Usage: cerealtest.py -i <inputfile> -o <outputfile>')
+        print(
+            'No input file specified. Usage: cerealtest.py -i <inputfile> -o <outputfile>')
         sys.exit(2)
     else:
         load_config_file(input_path)
@@ -76,4 +96,4 @@ if __name__ == '__main__':
     print('CerealTest v0.1')
     parse_args(sys.argv[1:])
     print(is_hex_string("9F34"))
-    print(is_hex_string("Holi"))
+    print(is_hex_string("Hi"))
