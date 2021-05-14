@@ -22,10 +22,7 @@ class Test(object):
 
 
 def is_hex_string(string):
-    if re.fullmatch("[0-9A-Fa-f]{2,}", string):
-        return True
-    else:
-        return False
+    return True if re.fullmatch("[0-9A-Fa-f]{2,}", string) else False
 
 
 def open_port(config):
