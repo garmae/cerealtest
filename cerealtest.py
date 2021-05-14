@@ -12,6 +12,13 @@ import getopt
 import subprocess
 
 
+def is_hex_string(string):
+    if re.fullmatch("[0-9A-Fa-f]{2,}", string):
+        return True
+    else:
+        return False
+
+
 def run_test(test):
     pass
 
@@ -19,7 +26,7 @@ def run_test(test):
 def open_port(config):
     ser = serial.Serial(config['port'], config['baudRate'])
     print('Port opened: ' + ser.name)
-    ser.write(b'Penis')
+    ser.write(b'Test')
     ser.close()
 
 
@@ -35,6 +42,8 @@ def load_config_file(path):
 
 def parse_args(argv):
     input_path = ''
+
+    # TODO: Add test result writer
     output_path = ''
     try:
         opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
@@ -60,3 +69,5 @@ def parse_args(argv):
 if __name__ == '__main__':
     print('CerealTest v0.1')
     parse_args(sys.argv[1:])
+    print(is_hex_string("9F34"))
+    print(is_hex_string("Holi"))
