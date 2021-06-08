@@ -1,35 +1,35 @@
 {
-  "serialConfig": {
-    "port": "COM7",
-    "baudRate": 19200,
-    "byteSize": "EIGHTBITS",
-    "parity": "PARITY_NONE",
-    "stopBits": "STOPBITS_ONE",
-    "timeout": 100.0,
-    "xonxoff": false,
-    "rtscts": false,
-    "dsrdtr": false,
-    "writeTimeout": 100.0
-  },
   "workingDirectory": "\\",
   "testType": "continuous",
   "expandCapturingGroups": true,
+  "serialConfig": {
+    "port": "COM7",
+    "baudRate": 19200,
+    "dataBits": 8,
+    "parity": "None",
+    "stopBits": 1,
+    "timeout": 1.0,
+    "xonxoff": false,
+    "rtscts": false,
+    "dsrdtr": false,
+    "writeTimeout": 1.0
+  },
   "tests": [
     {
       "name": "Basic Test",
-      "isHex": true,
+      "isHex": false,
       "message": "TEST",
       "expectedRegex": "06",
-      "delay": 10,
-      "postScript": "test.py"
+      "delay": 0,
+      "script": "test.py"
     },
     {
       "name": "Complex Test",
       "isHex": true,
-      "sendScript": "sendtest.py",
+      "message": "05",
       "expectedRegex": "06",
-      "delay": 10,
-      "postScript": "test.py"
+      "delay": 0,
+      "script": "test.py"
     }
   ]
 }
