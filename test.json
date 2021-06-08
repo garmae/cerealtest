@@ -12,6 +12,7 @@
     "writeTimeout": 100.0
   },
   "workingDirectory": "\\",
+  "testType": "continuous",
   "expandCapturingGroups": true,
   "tests": [
     {
@@ -20,15 +21,15 @@
       "message": "TEST",
       "expectedRegex": "06",
       "delay": 10,
-      "script": "test.py"
+      "postScript": "test.py"
     },
     {
       "name": "Complex Test",
       "isHex": true,
-      "message": "TEST",
+      "sendScript": "sendtest.py",
       "expectedRegex": "06",
       "delay": 10,
-      "script": "test.py"
+      "postScript": "test.py"
     }
   ]
 }

@@ -4,27 +4,46 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at https://mozilla.org/MPL/2.0/.
 
-import serial
-import json
-import sys
-import re
 import getopt
-import subprocess
+import json
+import re
+import sys
+
+import serial
 
 test_collection = []
 
 
+class SingletonMeta(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(
+                SingletonMeta, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class SerialPort(metaclass=SingletonMeta):
+    __serial_handle = serial.Serial()
+
+    @staticmethod
+    def setup(config):
+        SerialPort.__serial_handle.baudrate = int(config['baudRate'])
+        SerialPort.__serial_handle.port = config['port']
+
+
 class Test(object):
-    def __init__(self, my_dict):
+    def __init__(self, test_dict):
         self.name = None
         self.is_hex = None
         self.message = None
         self.expected_regex = None
         self.delay = None
         self.script = None
-        for key in my_dict:
+        for key in test_dict:
             setattr(self, re.sub(
-                r'(?<!^)(?=[A-Z])', '_', key).lower(), my_dict[key])
+                r'(?<!^)(?=[A-Z])', '_', key).lower(), test_dict[key])
 
     def run(self):
         pass
@@ -60,9 +79,11 @@ def load_config_file(path):
         except ValueError as err:
             print('Invalid JSON file: ' + str(err))
             sys.exit(1)
-        open_port(config_data['serialConfig'])
-        for test in config_data['tests']:
-            test_collection.append(Test(test))
+
+        SerialPort.setup(config_data['serialConfig'])
+
+        for test_spec in config_data['tests']:
+            test_collection.append(Test(test_spec))
 
 
 def parse_args(argv):
@@ -97,3 +118,5 @@ if __name__ == '__main__':
     parse_args(sys.argv[1:])
     print(is_hex_string("9F34"))
     print(is_hex_string("Hi"))
+    for test in test_collection:
+        test.run()
