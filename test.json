@@ -1,6 +1,6 @@
 {
   "workingDirectory": "\\",
-  "testType": "continuous",
+  "testingType": "manual",
   "expandCapturingGroups": true,
   "serialConfig": {
     "port": "COM7",
@@ -21,7 +21,7 @@
       "message": "TEST",
       "expectedRegex": "06",
       "delay": 0,
-      "script": "test.py"
+      "script": "sample.py"
     },
     {
       "name": "Complex Test",
@@ -29,7 +29,7 @@
       "message": "05",
       "expectedRegex": "06",
       "delay": 0,
-      "script": "test.py"
+      "script": "sample.py"
     }
   ]
 }

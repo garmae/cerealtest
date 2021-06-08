@@ -6,13 +6,17 @@
 import datetime
 import getopt
 import json
+import os
 import re
+import subprocess
 import sys
 import time
 
 import serial
 
 test_collection = []
+working_directory = ''
+testing_type = ''
 
 
 class SingletonMeta(type):
@@ -40,6 +44,7 @@ class SerialPort(metaclass=SingletonMeta):
         SerialPort.__serial_handle.rtscts = config['rtscts']
         SerialPort.__serial_handle.dsrdtr = config['dsrdtr']
         SerialPort.__serial_handle.write_timeout = config['writeTimeout']
+        SerialPort.__serial_handle.PARITIES = config['writeTimeout']
 
     @staticmethod
     def open():
@@ -106,12 +111,29 @@ class Test(object):
             response = response.decode('ascii')
         print(f'\nResponse: {response}')
 
+        if self.script is not None:
+            subprocess.call(f'python {os.getcwd()}{working_directory}{self.script} {response}', shell=True)
+
         SerialPort.close()
         print('\n')
 
 
 def is_hex_string(string):
     return True if re.fullmatch("[0-9A-Fa-f]{2,}", string) else False
+
+
+def show_test_menu():
+    num = 1
+
+    print("Test Selection")
+    for testy in test_collection:
+        print(f'{num}. {testy.name}')
+        num += 1
+
+    selected_test = input('Select test to run: ')
+    test_collection[int(selected_test) - 1].run()
+
+    show_test_menu()
 
 
 def load_config_file(path):
@@ -121,6 +143,11 @@ def load_config_file(path):
         except ValueError as err:
             print('Invalid JSON file: ' + str(err))
             sys.exit(1)
+
+        global working_directory
+        global testing_type
+        working_directory = config_data['workingDirectory']
+        testing_type = config_data['testingType']
 
         SerialPort.setup(config_data['serialConfig'])
 
@@ -160,5 +187,8 @@ if __name__ == '__main__':
     print('Copyright (c) Guillermo Eduardo Garcia Maynez Rocha.\n')
     parse_args(sys.argv[1:])
 
-    for test in test_collection:
-        test.run()
+    if testing_type == 'continuous':
+        for test in test_collection:
+            test.run()
+    else:
+        show_test_menu()
