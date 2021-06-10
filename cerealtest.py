@@ -15,53 +15,24 @@ import time
 
 import serial
 
-test_collection = []
 working_directory = ''
 testing_type = ''
+test_collection = []
+ser = serial.Serial()
 
 
-class SingletonMeta(type):
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(
-                SingletonMeta, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-
-class SerialPort(metaclass=SingletonMeta):
-    __serial_handle = serial.Serial()
-
-    @staticmethod
-    def setup(config):
-        SerialPort.__serial_handle.baudrate = int(config['baudRate'])
-        SerialPort.__serial_handle.port = config['port']
-        SerialPort.__serial_handle.timeout = config['timeout']
-        SerialPort.__serial_handle.bytesize = config['dataBits']
-        SerialPort.__serial_handle.parity = config['parity'][:1]
-        SerialPort.__serial_handle.stopbits = config['stopBits']
-        SerialPort.__serial_handle.xonxoff = config['xonxoff']
-        SerialPort.__serial_handle.rtscts = config['rtscts']
-        SerialPort.__serial_handle.dsrdtr = config['dsrdtr']
-        SerialPort.__serial_handle.write_timeout = config['writeTimeout']
-        SerialPort.__serial_handle.PARITIES = config['writeTimeout']
-
-    @staticmethod
-    def open():
-        SerialPort.__serial_handle.open()
-
-    @staticmethod
-    def close():
-        SerialPort.__serial_handle.close()
-
-    @staticmethod
-    def write(data):
-        SerialPort.__serial_handle.write(data)
-
-    @staticmethod
-    def read(size):
-        return SerialPort.__serial_handle.read(size)
+def setup_serial(config):
+    ser.baudrate = int(config['baudRate'])
+    ser.port = config['port']
+    ser.timeout = config['timeout']
+    ser.bytesize = config['dataBits']
+    ser.parity = config['parity'][:1]
+    ser.stopbits = config['stopBits']
+    ser.xonxoff = config['xonxoff']
+    ser.rtscts = config['rtscts']
+    ser.dsrdtr = config['dsrdtr']
+    ser.write_timeout = config['writeTimeout']
+    ser.PARITIES = config['writeTimeout']
 
 
 class Test(object):
@@ -95,15 +66,15 @@ class Test(object):
         self.__print_details()
 
         try:
-            SerialPort.open()
+            ser.open()
         except serial.SerialException as err:
             print('Serial error: ' + str(err))
             sys.exit(1)
 
         data = bytearray.fromhex(self.message) if self.is_hex else str.encode(self.message)
-        SerialPort.write(data)
+        ser.write(data)
         time.sleep(self.delay)
-        response = SerialPort.read(1024)
+        response = ser.read(1024)
 
         if self.is_hex:
             response = response.hex().upper() + ' (HEX)'
@@ -114,7 +85,7 @@ class Test(object):
         if self.script is not None:
             subprocess.call(f'python {os.getcwd()}{working_directory}{self.script} {response}', shell=True)
 
-        SerialPort.close()
+        ser.close()
         print('\n')
 
 
@@ -147,7 +118,7 @@ def load_config_file(path):
         working_directory = config_data['workingDirectory']
         testing_type = config_data['testingType']
 
-        SerialPort.setup(config_data['serialConfig'])
+        setup_serial(config_data['serialConfig'])
 
         for test_spec in config_data['tests']:
             test_collection.append(Test(test_spec))
