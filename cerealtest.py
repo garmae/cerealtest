@@ -21,6 +21,13 @@ test_collection = []
 ser = serial.Serial()
 
 
+def is_hex_string(string: str):
+    if re.fullmatch("[0-9A-Fa-f]{2,}", string):
+        if len(string) % 2 == 0:
+            return True
+    return False
+
+
 def setup_serial(config):
     ser.baudrate = int(config['baudRate'])
     ser.port = config['port']
@@ -32,7 +39,6 @@ def setup_serial(config):
     ser.rtscts = config['rtscts']
     ser.dsrdtr = config['dsrdtr']
     ser.write_timeout = config['writeTimeout']
-    ser.PARITIES = config['writeTimeout']
 
 
 class Test(object):
@@ -87,10 +93,6 @@ class Test(object):
 
         ser.close()
         print('\n')
-
-
-def is_hex_string(string):
-    return True if re.fullmatch("[0-9A-Fa-f]{2,}", string) else False
 
 
 def show_test_menu():
