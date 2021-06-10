@@ -1,6 +1,6 @@
 {
   "workingDirectory": "\\",
-  "testingType": "manual",
+  "testingType": "continuous",
   "expandCapturingGroups": true,
   "serialConfig": {
     "port": "COM7",

@@ -3,8 +3,9 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at https://mozilla.org/MPL/2.0/.
+
+import argparse
 import datetime
-import getopt
 import json
 import os
 import re
@@ -74,17 +75,16 @@ class Test(object):
         self.delay = None
         self.script = None
         for key in test_dict:
-            setattr(self, re.sub(
-                r'(?<!^)(?=[A-Z])', '_', key).lower(), test_dict[key])
+            setattr(self, re.sub(r'(?<!^)(?=[A-Z])', '_', key).lower(), test_dict[key])
 
     def validate_attribs(self):
         if self.is_hex:
             if not is_hex_string(self.message):
                 raise Exception("Message is not HEX and it is marked as such")
 
-    def print_details(self):
+    def __print_details(self):
         radix = ' (HEX)' if self.is_hex else ''
-        print(f'Message: {self.message}{radix}')
+        print(f'Message sent:\n{self.message}{radix}')
         print(f'Expected Regex: {self.expected_regex}')
         print(f'Delay: {self.delay}')
         print(f'Script: {self.script}')
@@ -92,7 +92,7 @@ class Test(object):
     def run(self):
         self.validate_attribs()
         print(f'{datetime.datetime.now().strftime("%Y/%m/%d %I:%M:%S %p")} - Running test \"{self.name}\"...')
-        self.print_details()
+        self.__print_details()
 
         try:
             SerialPort.open()
@@ -106,10 +106,10 @@ class Test(object):
         response = SerialPort.read(1024)
 
         if self.is_hex:
-            response = response.hex().upper()
+            response = response.hex().upper() + ' (HEX)'
         else:
             response = response.decode('ascii')
-        print(f'\nResponse: {response}')
+        print(f'\nResponse:\n{response}')
 
         if self.script is not None:
             subprocess.call(f'python {os.getcwd()}{working_directory}{self.script} {response}', shell=True)
@@ -123,13 +123,11 @@ def is_hex_string(string):
 
 
 def show_test_menu():
-    num = 1
-
+    test_num = 1
     print("Test Selection")
-    for testy in test_collection:
-        print(f'{num}. {testy.name}')
-        num += 1
-
+    for element in test_collection:
+        print(f'{test_num}. {element.name}')
+        test_num += 1
     selected_test = input('Select test to run: ')
     test_collection[int(selected_test) - 1].run()
 
@@ -155,37 +153,25 @@ def load_config_file(path):
             test_collection.append(Test(test_spec))
 
 
-def parse_args(argv):
+def parse_args():
     input_path = ''
 
     # TODO: Add test result writer
     output_path = ''
-    try:
-        opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
-    except getopt.GetoptError:
-        print('cerealtest.py -i <inputfile> -o <outputfile>')
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print('Usage: cerealtest.py -i <inputfile> -o <outputfile>')
-            sys.exit(0)
-        elif opt in ("-i", "--ifile"):
-            input_path = arg
-        elif opt in ("-o", "--ofile"):
-            output_path = arg
 
-    if not input_path:
-        print(
-            'No input file specified. Usage: cerealtest.py -i <inputfile> -o <outputfile>')
-        sys.exit(2)
-    else:
-        load_config_file(input_path)
+    arg_parser = argparse.ArgumentParser(description='Serial Test Automation')
+    arg_parser.add_argument('-i', '--input', help='Input File', required=True)
+    args = vars(arg_parser.parse_args())
+
+    input_path = args['input']
+
+    load_config_file(input_path)
 
 
 if __name__ == '__main__':
     print('CerealTest v0.2')
     print('Copyright (c) Guillermo Eduardo Garcia Maynez Rocha.\n')
-    parse_args(sys.argv[1:])
+    parse_args()
 
     if testing_type == 'continuous':
         for test in test_collection:
