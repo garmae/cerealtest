@@ -26,12 +26,12 @@ ser = serial.Serial()
 def print_hex_ascii_detail(hex_str: str):
     offset = 0
     hex_lines = textwrap.fill(hex_str, width=34).splitlines()
-    print(f'Offset\t00 01 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F')
-    print('----------------------------------------------------------')
+    print("Offset\t00 01 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F")
+    print("----------------------------------------------------------")
     for line in hex_lines:
         ascii_line = binascii.unhexlify(line).decode(encoding='ascii', errors='replace')
         line = " ".join(line[i:i + 2] for i in range(0, len(line), 2))
-        print(f'{offset:06X}\t{line.ljust(50)}\t{ascii_line}')
+        print("{0:06X}\t{1}\t{2}".format(offset, line.ljust(50), ascii_line))
         offset += 16
 
 
@@ -55,6 +55,19 @@ def setup_serial(config):
     ser.write_timeout = config['writeTimeout']
 
 
+class HexBytesAdapter:
+
+    def __init__(self, base_bytes: bytes):
+        self.base_bytes = base_bytes
+
+    def __getattr__(self, item):
+        return getattr(self.base_bytes, item)
+
+    def hex(self) -> str:
+        print(self.base_bytes)
+        return self.base_bytes.decode("ascii")
+
+
 class Test(object):
     """Individual Test definition"""
 
@@ -75,14 +88,16 @@ class Test(object):
 
     def __print_details(self):
         radix = ' (HEX)' if self.is_hex else ''
-        print(f'Message sent{radix}:\n{textwrap.fill(self.message, width=64)}')
-        print(f'Expected Regex: {self.expected_regex}')
-        print(f'Delay: {self.delay}')
-        print(f'Script: {self.script}')
+        print("Message to send{0}: {1}".format(radix, textwrap.fill(self.message, width=64)))
+        print("Expected Regex: {0}".format(self.expected_regex))
+        print("Delay: {0}".format(self.delay))
+        print("Script: {0}".format(self.script))
 
     def run(self):
         self.validate_attribs()
-        print(f'{datetime.datetime.now().strftime("%Y/%m/%d %I:%M:%S %p")} - Running test \"{self.name}\"...')
+        current_time = datetime.datetime.now().strftime("%Y/%m/%d %I:%M:%S %p")
+        print(
+            "{0} - Running test \"{1}\"...".format(current_time, self.name))
         self.__print_details()
 
         try:
@@ -94,16 +109,18 @@ class Test(object):
         data = bytearray.fromhex(self.message) if self.is_hex else str.encode(self.message)
         ser.write(data)
         time.sleep(self.delay)
-        response = ser.read(1024)
+        response = ser.read(ser.in_waiting or 1)
+        response = HexBytesAdapter(response)
 
         if self.is_hex:
             response = textwrap.fill(response.hex().upper(), width=64) + ' (HEX)'
         else:
             response = response.decode('ascii')
-        print(f'\nResponse:\n{response}')
+        print("\nResponse:\n{0}".format(response))
 
         if self.script is not None:
-            subprocess.call(f'python {os.getcwd()}/{working_directory}/{self.script} {response}', shell=True)
+            subprocess.call("python {0}/{1}/{2} {3}".format(os.getcwd(), working_directory, self.script, response),
+                            shell=True)
 
         ser.close()
         print('\n')
@@ -113,7 +130,7 @@ def show_test_menu():
     test_num = 1
     print("Test Selection")
     for element in test_collection:
-        print(f'{test_num}. {element.name}')
+        print("{0}. {1}".format(test_num, element.name))
         test_num += 1
     selected_test = input('Select test to run: ')
     test_collection[int(selected_test) - 1].run()
@@ -151,13 +168,12 @@ def parse_args():
     args = vars(arg_parser.parse_args())
 
     input_path = args['input']
-
     load_config_file(input_path)
 
 
 if __name__ == '__main__':
     print('CerealTest v0.2')
-    print('Copyright (c) Guillermo Eduardo Garcia Maynez Rocha.\n')
+    print('Copyright (c) 2021 Guillermo Eduardo Garcia Maynez Rocha.\n')
     parse_args()
 
     print_hex_ascii_detail(
