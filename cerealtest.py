@@ -54,6 +54,13 @@ def setup_serial(config):
     ser.dsrdtr = config['dsrdtr']
     ser.write_timeout = config['writeTimeout']
 
+    try:
+        ser.open()
+        time.sleep(2)
+    except serial.SerialException as err:
+        print('Serial error: ' + str(err))
+        sys.exit(1)
+
 
 class HexBytesAdapter:
 
@@ -100,16 +107,10 @@ class Test(object):
             "{0} - Running test \"{1}\"...".format(current_time, self.name))
         self.__print_details()
 
-        try:
-            ser.open()
-        except serial.SerialException as err:
-            print('Serial error: ' + str(err))
-            sys.exit(1)
-
         data = bytearray.fromhex(self.message) if self.is_hex else str.encode(self.message)
         ser.write(data)
         time.sleep(self.delay)
-        response = ser.read(ser.in_waiting or 1)
+        response = ser.readline()
         response = HexBytesAdapter(response)
 
         if self.is_hex:
@@ -122,19 +123,22 @@ class Test(object):
             subprocess.call("python {0}/{1}/{2} {3}".format(os.getcwd(), working_directory, self.script, response),
                             shell=True)
 
-        ser.close()
         print('\n')
 
 
 def show_test_menu():
     test_num = 1
-    print("Test Selection")
+    print("Test Menu")
     for element in test_collection:
         print("{0}. {1}".format(test_num, element.name))
         test_num += 1
+    print("{0}. {1}".format(test_num, "Quit"))
     selected_test = input('Select test to run: ')
-    test_collection[int(selected_test) - 1].run()
 
+    if int(selected_test) == test_num:
+        return
+
+    test_collection[int(selected_test) - 1].run()
     show_test_menu()
 
 
@@ -176,11 +180,10 @@ if __name__ == '__main__':
     print('Copyright (c) 2021 Guillermo Eduardo Garcia Maynez Rocha.\n')
     parse_args()
 
-    print_hex_ascii_detail(
-        'FF548838372727284585858ABCDE0000000000034455234234')
-
     if testing_type == 'continuous':
         for test in test_collection:
             test.run()
     else:
         show_test_menu()
+
+    ser.close()

@@ -4,7 +4,7 @@
   "expandCapturingGroups": true,
   "serialConfig": {
     "port": "COM3",
-    "baudRate": 9600,
+    "baudRate": 19200,
     "dataBits": 8,
     "parity": "None",
     "stopBits": 1,
