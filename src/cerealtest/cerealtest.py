@@ -105,7 +105,8 @@ class Test(object):
         raw_response = ser.readline()
 
         if self.is_hex:
-            response = textwrap.fill(raw_response.hex().upper(), width=64) + ' (HEX)' if self.is_hex else raw_response.decode('ascii')
+            response = textwrap.fill(raw_response.hex().upper(),
+                                     width=64) + ' (HEX)' if self.is_hex else raw_response.decode('ascii')
         else:
             response = raw_response.decode('ascii')
         print(f'\nResponse:\n{response}')
