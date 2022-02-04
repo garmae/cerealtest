@@ -167,7 +167,7 @@ def parse_args():
 
 if __name__ == '__main__':
     print('CerealTest v0.2')
-    print('Copyright (c) 2021-2022 Guillermo Eduardo Garcia Maynez Rocha.\n')
+    print('Copyright (c) 2021-2022 Guillermo Garcia Maynez.\n')
     parse_args()
 
     if testing_type == 'continuous':
