@@ -5,7 +5,6 @@
 # You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import argparse
-import binascii
 import datetime
 import json
 import os
@@ -21,18 +20,6 @@ working_directory = ''
 testing_type = ''
 test_collection = []
 ser = serial.Serial()
-
-
-def print_hex_ascii_detail(hex_str: str):
-    offset = 0
-    hex_lines = textwrap.fill(hex_str, width=34).splitlines()
-    print(f'Offset\t00 01 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F')
-    print('----------------------------------------------------------')
-    for line in hex_lines:
-        ascii_line = binascii.unhexlify(line).decode(encoding='ascii', errors='replace')
-        line = " ".join(line[i:i + 2] for i in range(0, len(line), 2))
-        print(f'{offset:06X}\t{line.ljust(50)}\t{ascii_line}')
-        offset += 16
 
 
 def is_hex_string(string: str):
